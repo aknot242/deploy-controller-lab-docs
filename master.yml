@@ -1,0 +1,63 @@
+- hosts: web
+  become: true
+  tasks:
+
+    - name: Install required system packages
+      apt:
+        name: "{{ packages }}"
+        state: latest
+        update_cache: true
+        force_apt_get: true
+      vars:
+        packages:
+        - python3-pip
+
+    - name: Install docker python package
+      pip:
+        name: docker
+
+    - name: Set release url
+      set_fact:
+        release_url: "{{ github_base_url }}/nginx-controller-lab/releases/latest"
+
+    - name: Get latest documentation file download url
+      uri:
+        url: "{{ release_url }}"
+        return_content: true
+        status_code: 200
+      register: releases
+      check_mode: false
+
+    - set_fact:
+        # weird workaround below: https://github.com/ansible/ansible/issues/27299
+        release_url: "{{ releases.json | to_json | from_json | json_query('assets[?starts_with(name, `nginx-controller-lab`)] | [0] | browser_download_url') }}"
+
+    - name: Ensure lab-docs directory exists
+      file:
+        path: /etc/lab-docs
+        state: directory
+        mode: 0644
+
+    - name: Download documentation tar
+      get_url:
+        url: "{{ release_url }}"
+        dest: /etc/lab-docs/docs.tar.gz
+        force: true
+      check_mode: false
+
+
+    - name: Unarchive the file that is already on the remote machine
+      unarchive:
+        src: /etc/lab-docs/docs.tar.gz
+        dest: /etc/lab-docs
+        remote_src: true
+
+    - name: Create an NGINX container to host the lab docs
+      docker_container:
+        name: controller-lab-docs
+        image: nginx
+        restart_policy: unless-stopped
+        ports:
+          - "3005:80"
+        volumes:
+          - /etc/lab-docs:/usr/share/nginx/html
