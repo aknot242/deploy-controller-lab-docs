@@ -7,12 +7,12 @@ Used on the Ansible host in the UDF Controller lab to download and host the lab 
 How to Use
 ------------
 
-To use this playbook just run this command.
+To use this playbook just run these commands:
 
-	1. SSH Into the Ansible instance in the UDF blueprint
-	2. Run `git clone <this repo>`
-	3. Run `cd deploy-controller-lab-docs`
-	4. Run `ansible-playbook master.yml -e @vars/all_vars.yml -i hosts/udf`
+1. SSH Into the Ansible instance in the UDF blueprint
+2. Run `git clone <this repo>`
+3. Run `cd deploy-controller-lab-docs`
+4. Run `ansible-playbook master.yml -e @vars/all_vars.yml -i hosts/udf`
 
 Requirements
 ------------
