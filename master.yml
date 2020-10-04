@@ -1,4 +1,4 @@
-- hosts: web
+- hosts: appcontainer_shared
   become: true
   tasks:
 
@@ -18,7 +18,7 @@
 
     - name: Set release url
       set_fact:
-        release_url: "{{ github_base_url }}/nginx-controller-lab/releases/latest"
+        release_url: "{{ github_base_url }}/{{ github_project }}/releases/latest"
 
     - name: Get latest documentation file download url
       uri:
